@@ -6,7 +6,7 @@ April 29, 2024
 Audrey Rojas
 
 ### Added
-
+Added video submission
 
 ### Changed
 Changed app.py code to my code
