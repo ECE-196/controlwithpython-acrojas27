@@ -12,8 +12,26 @@ S_ERR: int = 0xff
 def detached_callback(f):
     return lambda *args, **kwargs: Thread(target=f, args=args, kwargs=kwargs).start()
 
+class LockedSerial(Serial):
+    _lock: Lock = Lock()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def read(self, size=1) -> bytes:
+        with self._lock:
+            return super().read(size)
+
+    def write(self, b: bytes, /) -> int | None:
+        with self._lock:
+            super().write(b)
+
+    def close(self):
+        with self._lock:
+            super().close()
+
 class App(tk.Tk):
-    ser: Serial
+    ser: LockedSerial
     
 
     
@@ -34,7 +52,7 @@ class App(tk.Tk):
         
     @detached_callback    
     def connect(self):
-        self.ser = Serial(self.port.get())    
+        self.ser = LockedSerial(self.port.get())    
         
     @detached_callback      
     def update_led(self):
@@ -83,24 +101,9 @@ class SerialPortal(tk.Toplevel):
         self.destroy()
         self.parent.deiconify() # reveal App
 
-class LockedSerial(Serial):
-    _lock: Lock = Lock()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def read(self, size=1) -> bytes:
-        with self._lock:
-            return super().read(size)
-
-    def write(self, b: bytes, /) -> int | None:
-        with self._lock:
-            super().write(b)
-
-    def close(self):
-        with self._lock:
-            super().close()
 
 if __name__ == '__main__':
     with App() as app:
         app.mainloop()
+    
