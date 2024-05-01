@@ -4,6 +4,9 @@ Our code is event driven by an interrupt and the computer receives each byte and
 
 ### What does `detached_callback` do? What would happen if it wasn't used?
 It allows code to run concurrently so that multiple operations can occur at once. Python is single threaded and the UI will remain frozen until the serial code is done executing 
-If it was not used, each line of code would run one by one and it would take more time to complete
+If it was not used, each line of code would run one by one and it would take more time to complete. It helpes to prevent the UI from becoming frozen if any of the serial code gets stuck/takes too long using a decorator.
 
 ### What does `LockedSerial` do? Why is it _necessary_?
+Since  multiple threads can use the serial port at once, we wrap the serial in a lock, which locks an object until it is released.
+It is necessary to allow the Serial function while also locking every cell.
+
